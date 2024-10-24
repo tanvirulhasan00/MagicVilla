@@ -1,4 +1,6 @@
 using MagicVilla.DatabaseConfig.Data;
+using MagicVilla.RepositoryConfig.IRepositories;
+using MagicVilla.RepositoryConfig.Repositories;
 using MagicVilla.WebApi;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +18,9 @@ builder.Services.AddDbContext<MagicVillaDbContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("LocalDb")));
 //Mapping config
 builder.Services.AddAutoMapper(typeof(MappingConfig));
+
+//Add IUnitOfWork
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 

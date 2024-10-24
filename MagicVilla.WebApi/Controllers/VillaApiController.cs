@@ -3,6 +3,7 @@ using MagicVilla.DatabaseConfig.Data;
 using MagicVilla.Models.ResponseModels.ApiResponse;
 using MagicVilla.Models.VillaDbModels;
 using MagicVilla.Models.VillaDtoModels;
+using MagicVilla.RepositoryConfig.IRepositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +15,12 @@ namespace MagicVilla.WebApi.Controllers
     [ApiController]
     public class VillaApiController : ControllerBase
     {
-        private readonly MagicVillaDbContext _magicVillaDbContext;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ApiResponse response;
         private readonly IMapper _mapper;
-        public VillaApiController(MagicVillaDbContext magicVillaDbContext,IMapper mapper)
+        public VillaApiController(IUnitOfWork unitOfWork,IMapper mapper)
         {
-            _magicVillaDbContext = magicVillaDbContext;
+            _unitOfWork = unitOfWork;
             this.response = new ApiResponse();
             _mapper = mapper;
         }
@@ -28,9 +29,8 @@ namespace MagicVilla.WebApi.Controllers
         public async Task<ApiResponse> GetAllVilla(int PageNumber, int PageSize)
         {
             //Getting villa from db
-            var villa =await _magicVillaDbContext
-                .Villas
-                .ToListAsync();
+            var villa = await _unitOfWork
+                .Villa.GetAllAsync();
             // implementing pagination
             var paginatedData = villa
                 .Skip((PageNumber - 1) * PageSize)
@@ -67,7 +67,7 @@ namespace MagicVilla.WebApi.Controllers
                 response.Message = "Unsuccessful - search with valid id.";
                 return response;
             }
-            var villa = await _magicVillaDbContext.Villas.FirstOrDefaultAsync(x=>x.VillaId == id);
+            var villa = await _unitOfWork.Villa.GetAsync(x=>x.VillaId == id);
             if (villa != null)
             {
                 response.IsSuccess = true;
@@ -91,8 +91,8 @@ namespace MagicVilla.WebApi.Controllers
             if (createDto != null)
             {
                 Villa model = _mapper.Map<Villa>(createDto);
-                await _magicVillaDbContext.Villas.AddAsync(model);
-                int result = await _magicVillaDbContext.SaveChangesAsync();
+                await _unitOfWork.Villa.AddAsync(model);
+                int result = await _unitOfWork.Save();
                 if(result > 0)
                 {
                     response.IsSuccess = true;
@@ -119,8 +119,8 @@ namespace MagicVilla.WebApi.Controllers
             if(updateDto != null)
             {
                 var model = _mapper.Map<Villa>(updateDto);
-                _magicVillaDbContext.Villas.UpdateRange(model);
-                int result = await _magicVillaDbContext.SaveChangesAsync();
+                _unitOfWork.Villa.Update(model);
+                int result = await _unitOfWork.Save();
                 if (result > 0)
                 {
                     response.IsSuccess = true;
