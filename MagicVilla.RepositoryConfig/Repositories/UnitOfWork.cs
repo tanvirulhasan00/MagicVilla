@@ -15,10 +15,12 @@ namespace MagicVilla.RepositoryConfig.Repositories
     {
         private readonly MagicVillaDbContext _magicVillaDbContext;
         public IVillaRepository Villa { get; private set; }
+        public IVillaNumberRepository VillaNumber { get; private set; }
         public UnitOfWork(MagicVillaDbContext magicVillaDbContext)
         {
             _magicVillaDbContext = magicVillaDbContext;
             Villa = new VillaRepository(_magicVillaDbContext);
+            VillaNumber = new VillaNumberRepository(_magicVillaDbContext);
         }
         public async Task<int> Save()
         {

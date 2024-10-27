@@ -10,6 +10,7 @@ namespace MagicVilla.RepositoryConfig.IRepositories
     public interface IUnitOfWork
     {
         IVillaRepository Villa { get; }
+        IVillaNumberRepository VillaNumber { get; }
         Task<int> Save();
     }
 }
